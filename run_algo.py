@@ -17,6 +17,7 @@ from schedulers import (
 def _summary_single_episode_result(results: dict, reward: float, episode: int) -> dict:
     waiting_time = 0.0
     execution_time = 0.0
+    reschedule_count = 0
     n_qtasks_on_qnode = {}
 
     for i in range(5):
@@ -25,6 +26,7 @@ def _summary_single_episode_result(results: dict, reward: float, episode: int) -
     for res in results:
         waiting_time += res["waiting_time"]
         execution_time += res["execution_time"]
+        reschedule_count += res["reschedule_count"]
         n_qtasks_on_qnode["qnode_id_" + str(res["qnode_id"])] += 1
     
     return {
@@ -32,7 +34,8 @@ def _summary_single_episode_result(results: dict, reward: float, episode: int) -
         "waiting_time": waiting_time,
         "execution_time": execution_time,
         "n_qtasks_on_qnode": n_qtasks_on_qnode,
-        "reward": reward
+        "reward": reward,
+        "reschedule_count": reschedule_count
     }
 
 
@@ -41,7 +44,7 @@ def _save_results(results: list[dict], algorithm: str):
 
     print(results)
 
-    headers = ["episode", "waiting_time", "execution_time", "n_qtasks_on_qnode", "reward"]
+    headers = ["episode", "waiting_time", "execution_time", "n_qtasks_on_qnode", "reward", "reschedule_count"]
 
     with open(f"results/schedulers/{algorithm}/results.csv", "w+") as f:
         writer = csv.DictWriter(f, fieldnames=headers)
