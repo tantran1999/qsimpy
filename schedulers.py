@@ -18,12 +18,8 @@ class GreedyScheduler(BaseScheduler):
 
     def select_qnode(self) -> int:
         qnode_with_min = min(self.env.qnodes, key=lambda x: x.next_available_time)
-        is_statisfied, _ = self.env.broker.check_qtask_constraints(
-            qtask=self.env.current_qtask,
-            qnode=self.env.qnodes[qnode_with_min.id]
-        )
 
-        if is_statisfied:
+        if self.env.current_qtask.qubit_number <= self.env.qnodes[qnode_with_min.id].qubit_number:
             return qnode_with_min.id
 
         # Get the QNode with largest qubit_number

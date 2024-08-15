@@ -42,14 +42,24 @@ def _summary_single_episode_result(results: dict, reward: float, episode: int) -
 def _save_results(results: list[dict], algorithm: str):
     import csv
 
-    print(results)
-
     headers = ["episode", "waiting_time", "execution_time", "n_qtasks_on_qnode", "reward", "reschedule_count"]
 
     with open(f"results/schedulers/{algorithm}/results.csv", "w+") as f:
         writer = csv.DictWriter(f, fieldnames=headers)
         writer.writeheader()
         writer.writerows(results)
+
+
+def _save_single_episode_results(results: list[dict], algorithm: str):
+    import csv
+
+    headers = ["steps", "waiting_time", "execution_time", "n_qtasks_on_qnode", "reward", "reschedule_count"]
+
+    with open(f"results/schedulers/{algorithm}/single_episode/{results['episode']}_result.csv") as f:
+        writer = csv.DictWriter(f, fieldnames=headers)
+        writer.writeheader()
+        writer.writerows(results)
+ 
 
 
 def _get_scheduler(algorithm: str, **kwargs) -> BaseScheduler:
@@ -90,6 +100,7 @@ def implement_scheduler(dataset: str, episode: int, algorithm: str, **kwargs):
         while not terminated:
             qnode_id = scheduler.select_qnode()
             obs, reward, terminated, _, info = env.step(qnode_id)
+            env.qsp_env.run()
             e_reward += reward
             scheduled_qtask: QTask = info["scheduled_qtask"]
             result = {
@@ -143,7 +154,6 @@ if __name__ == "__main__":
     obs_filter = args.obs_filter
     reward_filter = args.reward_filter
 
-    if args.verbose:
-        Log.log = args.verbose
+    Log.log = args.verbose
 
     main(dataset, episode, algorithm, obs_filter=obs_filter, reward_filter=reward_filter)
